@@ -162,11 +162,10 @@ void ShowMainMenu()
 void MenuTask()
 {
     cout << "     Menu Task   \n";
-    cout << "    1.  Local array  \n";
-    cout << "    2.  Dynamic array 1 \n";
-    cout << "    3.  Dynamic array 2  new \n"; 
-    cout << "    4.  Dynamic array : vector \n";
-    cout << "    5.  Exit \n";
+    cout << "    1.  Task 1  \n";
+    cout << "    2.  Task 2 \n";
+    cout << "    3.  Task 3 \n"; 
+    cout << "    4.  Exit \n";
 }
 
 void MenuInput()
@@ -195,11 +194,217 @@ void  TestVariant(int N, double* A, double* B, double* C) {
         C[i] = A[2 * i + 1];
     }
 }
-/*
-*  Task  Var
-* 
-* 
-*/
+//Завдання 3.1, 1 варіант
+int ArrayTask3_1(int n, double* A, double* B)
+{
+    int sizeB = 0;
+    for (int i = 0; i < n; i++) {
+        if (A[i] > 0) {
+            B[sizeB] = A[i];
+            sizeB++;
+        }
+    }
+    return sizeB;
+}
+
+void Task3_1()
+{
+    const int MAX_SIZE = 560;
+    double A[MAX_SIZE], B[MAX_SIZE];
+    int n, sizeB;
+
+    cout << "\n--- Task 1: Positive elements ---\n";
+
+    // Ввод масива
+    n = ConsoleInputArray(MAX_SIZE, A);
+
+    // Формування B
+    sizeB = ArrayTask3_1(n, A, B);
+
+    // Запис в файл
+    WriteArrayTextFile(n, A, "A.txt");
+    WriteArrayTextFile(sizeB, B, "B.txt");
+
+    // Вивід
+    cout << "\nArray A:\n";
+    for (int i = 0; i < n; i++)
+        cout << A[i] << " ";
+
+    cout << "\n\nArray B:\n";
+    for (int i = 0; i < sizeB; i++)
+        cout << B[i] << " ";
+
+    cout << "\n\nPress Enter...";
+    cin.ignore();
+    cin.get();
+}
+
+//Завдання 3.2, варіант 1
+
+int FindLastMaxPositiveAfterT(int n, int* A, int T)
+{
+    int startIndex = -1;
+
+    // Шукаємо перший елемент > T
+    for (int i = 0; i < n; i++) {
+        if (A[i] > T) {
+            startIndex = i;
+            break;
+        }
+    }
+
+    if (startIndex == -1) return -1; 
+
+    int max = -2147483648; 
+    int index = -1;
+
+    int* p = A + startIndex;
+
+    for (int i = startIndex; i < n; i++, p++) {
+        if (*p > 0) { 
+            if (*p >= max) { 
+                max = *p;
+                index = i;
+            }
+        }
+    }
+
+    return index;
+}
+
+int RndInputArrayInt(int sizeMax, int* A)
+{
+    int size = ConsoleInputSizeArray(sizeMax);
+    srand(time(NULL));
+
+    for (int i = 0; i < size; i++) {
+        A[i] = rand() % 100 - 50;
+        cout << A[i] << " ";
+    }
+
+    return size;
+}
+
+void WriteArrayBinFileInt(int n, int* arr, const char* fileName)
+{
+    ofstream bfout(fileName, ios_base::binary);
+    if (bfout.fail()) return;
+
+    bfout.write((const char*)&n, sizeof(int));
+    bfout.write((const char*)arr, n * sizeof(int));
+
+    bfout.close();
+}
+
+void Task3_2()
+{
+    const int MAX_SIZE = 500;
+    int* A = new int[MAX_SIZE];
+
+    int n = RndInputArrayInt(MAX_SIZE, A);
+
+    int T;
+    cout << "\nEnter T: ";
+    cin >> T;
+
+    int index = FindLastMaxPositiveAfterT(n, A, T);
+
+    if (index == -1)
+        cout << "\nNot found\n";
+    else
+        cout << "\nIndex = " << index << " Value = " << A[index] << endl;
+
+    WriteArrayBinFileInt(n, (int*)A, "A.bin");
+
+    delete[] A;
+}
+
+//Завдання 3.3, варіант 1
+void ArrayTask3_3(int n, double* X, double a, double b,
+    double& sumLessA,
+    double& prodGreaterB,
+    double& maxAB,
+    double& minAB,
+    bool& hasAB)
+{
+    sumLessA = 0;
+    prodGreaterB = 1;
+    hasAB = false;
+
+    for (int i = 0; i < n; i++)
+    {
+        if (X[i] < a)
+            sumLessA += X[i];
+
+        if (X[i] > b)
+            prodGreaterB *= X[i];
+
+        if (X[i] >= a && X[i] <= b)
+        {
+            if (!hasAB)
+            {
+                maxAB = minAB = X[i];
+                hasAB = true;
+            }
+            else
+            {
+                if (X[i] > maxAB) maxAB = X[i];
+                if (X[i] < minAB) minAB = X[i];
+            }
+        }
+    }
+}
+
+void Task3_3()
+{
+    const int MAX_SIZE = 200;
+    double* X = new double[MAX_SIZE];
+
+    double a, b;
+    cout << "Enter a and b (a < b): ";
+    cin >> a >> b;
+
+    int n = ReadArrayTextFile(MAX_SIZE, X, "input.txt");
+
+    double sumLessA, prodGreaterB, maxAB, minAB;
+    bool hasAB;
+
+    ArrayTask3_3(n, X, a, b,
+        sumLessA,
+        prodGreaterB,
+        maxAB,
+        minAB,
+        hasAB);
+
+    // Вивід у консоль
+    cout << "\nSum X(i) < a: " << sumLessA << endl;
+    cout << "Product X(i) > b: " << prodGreaterB << endl;
+
+    if (hasAB)
+    {
+        cout << "Max in [a,b]: " << maxAB << endl;
+        cout << "Min in [a,b]: " << minAB << endl;
+    }
+    else
+    {
+        cout << "No elements in [a,b]\n";
+    }
+
+    // Запис у файл
+    ofstream fout("output.txt");
+    fout << sumLessA << endl;
+    fout << prodGreaterB << endl;
+
+    if (hasAB)
+        fout << maxAB << " " << minAB << endl;
+    else
+        fout << "No elements in [a,b]\n";
+
+    fout.close();
+
+    delete[] X;
+}
+
 void TaskV()
 {
     char ch = '5',t;
@@ -209,10 +414,11 @@ void TaskV()
         ch = getchar();
         t=getchar();
             switch (ch) {
-             case '1': cout << " 1 "; break;
-             case '2': cout << " 2 "; break;
+             case '1': Task3_1(); break;
+             case '2': Task3_2(); break;
+             case '3': Task3_3(); break;
             //
-            case '5': return;
+            case '4': return;
             }
         cout << " Press any key and enter\n";
         ch = getchar();
@@ -233,7 +439,6 @@ void ArrayLocal()
         switch (ch) {
         case '1': cout << " 1 "; break;
         case '2': cout << " 2 "; break;
-            //
         case '5': return;
         }
         cout << " Press any key and enter\n";
